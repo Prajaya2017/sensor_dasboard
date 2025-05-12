@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon May 12 09:34:19 2025
-
-@author: pprajapati
-"""
-
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
@@ -30,24 +23,63 @@ def generate_sensor_data(n=50):
     })
     return df
 
-# App layout
+# App layout with Tabs
 app.layout = html.Div([
     html.H2("Real-Time Sensor Data Monitoring (2x2 Grid)", style={'textAlign': 'center'}),
+    
+    dcc.Tabs(id="tabs", children=[
+        # First Tab with 2x2 Grid Plots
+        dcc.Tab(label='Sensor Data Tab 1', children=[
+            html.Div([
+                dcc.Graph(id='sensor-graph-1'),
 
-    dcc.Graph(id='sensor-graph'),
+                dcc.Interval(
+                    id='interval-component-1',
+                    interval=5000,  # Update every 5 seconds
+                    n_intervals=0
+                )
+            ])
+        ]),
 
-    dcc.Interval(
-        id='interval-component',
-        interval=5000,  # Update every 5 seconds
-        n_intervals=0
-    )
+        # Second Tab with 2x2 Grid Plots
+        dcc.Tab(label='Sensor Data Tab 2', children=[
+            html.Div([
+                dcc.Graph(id='sensor-graph-2'),
+
+                dcc.Interval(
+                    id='interval-component-2',
+                    interval=5000,  # Update every 5 seconds
+                    n_intervals=0
+                )
+            ])
+        ])
+    ])
 ])
 
+# Callback to update Graph 1
 @app.callback(
-    Output('sensor-graph', 'figure'),
-    Input('interval-component', 'n_intervals')
+    Output('sensor-graph-1', 'figure'),
+    Input('interval-component-1', 'n_intervals')
 )
-def update_graph(n):
+def update_graph_1(n):
+    df = generate_sensor_data()
+
+    fig = make_subplots(rows=2, cols=2, subplot_titles=('Temperature', 'Humidity', 'Pressure', 'Light'))
+
+    fig.add_trace(go.Scatter(x=df['Time'], y=df['Temperature'], mode='lines+markers'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df['Time'], y=df['Humidity'], mode='lines+markers'), row=1, col=2)
+    fig.add_trace(go.Scatter(x=df['Time'], y=df['Pressure'], mode='lines+markers'), row=2, col=1)
+    fig.add_trace(go.Scatter(x=df['Time'], y=df['Light'], mode='lines+markers'), row=2, col=2)
+
+    fig.update_layout(height=600, title_text="Sensor Data (Updated every 5 seconds)")
+    return fig
+
+# Callback to update Graph 2 (same function, just tied to another tab)
+@app.callback(
+    Output('sensor-graph-2', 'figure'),
+    Input('interval-component-2', 'n_intervals')
+)
+def update_graph_2(n):
     df = generate_sensor_data()
 
     fig = make_subplots(rows=2, cols=2, subplot_titles=('Temperature', 'Humidity', 'Pressure', 'Light'))
