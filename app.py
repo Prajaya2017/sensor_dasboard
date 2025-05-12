@@ -12,8 +12,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 
 # Load and preprocess the data
-data = pd.read_csv(
-    'C:/Campbellsci/LoggerNet/Irgason_garden_Flux_AmeriFluxFormat.dat',
+data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
     skiprows=[0, 2, 3],
     header=0
 )
