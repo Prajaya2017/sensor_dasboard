@@ -10,8 +10,6 @@ import numpy as np
 data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
-
-# Replace outlier G values
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -900), np.nan)
 
 # Variables for each tab
@@ -23,13 +21,12 @@ tab1_variables = [
 ]
 
 tab2_variables = [
-    'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-    'FETCH_40', 'ZL', 'MO_LENGTH', 'U_SIGMA',
-    'V_SIGMA', 'W_SIGMA', 'P', 'T_SONIC',
+    'U_SIGMA', 'V_SIGMA', 'W_SIGMA', 'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+    'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC',
     'SWC', 'U-V-W SIGMA', 'USTAR vs WS', 'VPD'
 ]
 
-# Tab style matching U-V-W Sigma color
+# Styles
 tab_style = {
     'padding': '8px',
     'fontWeight': 'bold',
@@ -69,31 +66,34 @@ def update_graph(tab, n):
         fig = make_subplots(rows=4, cols=4, subplot_titles=[
             var if var != 'TA_COMBINED' else 'TA'
             for var in tab1_variables
-        ],                             
-        horizontal_spacing=0.03,
-        vertical_spacing=0.06)
+        ], horizontal_spacing=0.03, vertical_spacing=0.06)
 
         for i, var in enumerate(tab1_variables):
             row, col = i // 4 + 1, i % 4 + 1
             if var == 'TA_COMBINED':
-                for sensor in ['TA_1_1_1', 'TA_1_1_2', 'TA_1_1_3']:
+                for j, sensor in enumerate(['TA_1_1_1', 'TA_1_1_2', 'TA_1_1_3']):
                     fig.add_trace(go.Scatter(
                         x=data['datetime'], y=data[sensor], mode='lines', name=sensor,
-                        line=dict(width=1)
+                        line=dict(width=1),
+                        showlegend=(j == 0),
+                        legendgroup='TA',
+                        legendgrouptitle_text='TA Sensors',
+                        hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + sensor + ': %{y:.2f}<extra></extra>'
                     ), row=row, col=col)
             else:
                 fig.add_trace(go.Scatter(
                     x=data['datetime'], y=data[var], mode='lines', name=var,
-                    line=dict(width=1)
+                    line=dict(width=1),
+                    hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
                 ), row=row, col=col)
 
-        # Set font size for subplot titles
         for annotation in fig['layout']['annotations']:
             annotation['font'] = dict(size=12)
 
         fig.update_layout(
-            height=900,
+            height=1200,
             showlegend=False,
+            hovermode='x unified',
             font=dict(size=10),
             margin=dict(t=40, b=40, l=40, r=40),
         )
@@ -104,54 +104,70 @@ def update_graph(tab, n):
 
     elif tab == 'tab2':
         fig = make_subplots(rows=4, cols=4, subplot_titles=[
-            'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-            'FETCH_40', 'ZL', 'MO_LENGTH', 'U_SIGMA',
-            'NET RADIOMETER', 'V_SIGMA', 'W_SIGMA', 'P',
-            'T_SONIC', 'SWC', 'USTAR vs WS', 'VPD'
-        ],
-        horizontal_spacing=0.03, vertical_spacing=0.06)
+            'U_SIGMA', 'V_SIGMA', 'W_SIGMA', 'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+            'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC',
+            'SWC', 'U-V-W SIGMA', 'USTAR vs WS', 'VPD'
+        ], horizontal_spacing=0.03, vertical_spacing=0.06)
 
         vars_to_plot = [
-            'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-            'FETCH_40', 'ZL', 'MO_LENGTH', 'U_SIGMA',
-            'V_SIGMA', 'W_SIGMA', 'P', 'T_SONIC'
+            'U_SIGMA', 'V_SIGMA', 'W_SIGMA', 'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+            'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC'
         ]
 
         for i, var in enumerate(vars_to_plot):
             row, col = i // 4 + 1, i % 4 + 1
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[var], mode='lines', name=var,
-                line=dict(width=1)
+                line=dict(width=1),
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=row, col=col)
 
-        # Net Radiometer (subplot 9)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['NETRAD'], mode='lines', name='NETRAD', line=dict(width=1)), row=3, col=1)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['SW_IN'], mode='lines', name='SW_IN', line=dict(width=1)), row=3, col=1)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['SW_OUT'], mode='lines', name='SW_OUT', line=dict(width=1)), row=3, col=1)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['LW_IN'], mode='lines', name='LW_IN', line=dict(width=1)), row=3, col=1)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['LW_OUT'], mode='lines', name='LW_OUT', line=dict(width=1)), row=3, col=1)
+        # Net Radiation group (subplot 9 at row 3, col 1)
+        netrad_vars = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
+        for j, var in enumerate(netrad_vars):
+            fig.add_trace(go.Scatter(
+                x=data['datetime'], y=data[var], mode='lines', name=var,
+                showlegend=(j == 0),
+                legendgroup='NetRad',
+                legendgrouptitle_text='Net Radiation',
+                line=dict(width=1),
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
+            ), row=3, col=1)
 
         # SWC group (subplot 14)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['SWC_1_1_1'], mode='lines', name='SWC_1_1_1', line=dict(width=1)), row=4, col=2)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['SWC_1_1_2'], mode='lines', name='SWC_1_1_2', line=dict(width=1)), row=4, col=2)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['SWC_1_1_3'], mode='lines', name='SWC_1_1_3', line=dict(width=1)), row=4, col=2)
+        for j, swc in enumerate(['SWC_1_1_1', 'SWC_1_1_2', 'SWC_1_1_3']):
+            fig.add_trace(go.Scatter(
+                x=data['datetime'], y=data[swc], mode='lines', name=swc,
+                showlegend=(j == 0),
+                legendgroup='SWC',
+                legendgrouptitle_text='SWC Sensors',
+                line=dict(width=1),
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
+            ), row=4, col=2)
 
         # Scatter USTAR vs WS (subplot 15)
-        fig.add_trace(go.Scatter(x=data['USTAR'], y=data['WS'], mode='markers', name='USTAR vs WS', marker=dict(size=4, opacity=0.6)), row=4, col=3)
+        fig.add_trace(go.Scatter(
+            x=data['USTAR'], y=data['WS'], mode='markers', name='USTAR vs WS',
+            marker=dict(size=4, opacity=0.6),
+            hovertemplate='USTAR: %{x:.2f}<br>WS: %{y:.2f}<extra></extra>'
+        ), row=4, col=3)
 
         # VPD (subplot 16)
-        fig.add_trace(go.Scatter(x=data['datetime'], y=data['VPD'], mode='lines', name='VPD', line=dict(width=1)), row=4, col=4)
+        fig.add_trace(go.Scatter(
+            x=data['datetime'], y=data['VPD'], mode='lines', name='VPD',
+            line=dict(width=1),
+            hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>VPD: %{y:.2f}<extra></extra>'
+        ), row=4, col=4)
 
-        # Set font size for subplot titles
         for annotation in fig['layout']['annotations']:
             annotation['font'] = dict(size=12)
 
         fig.update_layout(
             height=1200,
             showlegend=False,
+            hovermode='x unified',
             font=dict(size=10),
             margin=dict(t=30, b=30, l=30, r=30),
-            title_font_size=10
         )
 
         fig.update_xaxes(tickangle=25, tickformat="%m-%d-%y")
