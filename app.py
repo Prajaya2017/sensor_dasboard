@@ -17,7 +17,12 @@ import numpy as np
 data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
+# force numeric conversion (invalid parsing becomes NaN)
+data['G'] = pd.to_numeric(data['G'], errors='coerce')
+
+# now apply the range filter
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -900), np.nan)
+
 
 # Variables for each tab
 tab1_variables = [
