@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 
 # Load and preprocess data
-data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
+data = pd.read_csv('C:/Campbellsci/LoggerNet/Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -900), np.nan)
@@ -17,13 +17,13 @@ tab1_variables = [
     'FC', 'LE', 'H', 'ET',
     'TAU', 'USTAR',
     'RH_1_1_1', 'PA', 'WS', 'WD', 'VPD',
-    'TA_COMBINED', 'SWC_1_1_1', 'SWC_1_1_2', 'SWC_1_1_3', 'PBLH'
+    'TA_COMBINED', 'PBLH'
 ]
 
 tab2_variables = [
-    'U_SIGMA', 'V_SIGMA', 'W_SIGMA', 'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-    'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC',
-    'SWC', 'U-V-W SIGMA', 'USTAR vs WS', 'VPD'
+     'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+    'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC','NET RAD'
+    'SWC', 'U-V-W SIGMA', 'USTAR vs WS'
 ]
 
 # Styles
@@ -104,13 +104,13 @@ def update_graph(tab, n):
 
     elif tab == 'tab2':
         fig = make_subplots(rows=4, cols=4, subplot_titles=[
-            'U_SIGMA', 'V_SIGMA', 'W_SIGMA', 'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+            'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
             'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC',
-            'SWC', 'U-V-W SIGMA', 'USTAR vs WS', 'VPD'
+            'NET RAD','SWC', 'U-V-W SIGMA', 'USTAR vs WS'
         ], horizontal_spacing=0.03, vertical_spacing=0.06)
 
         vars_to_plot = [
-            'U_SIGMA', 'V_SIGMA', 'W_SIGMA', 'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+             'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
             'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC'
         ]
 
@@ -132,7 +132,7 @@ def update_graph(tab, n):
                 legendgrouptitle_text='Net Radiation',
                 line=dict(width=1),
                 hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
-            ), row=3, col=1)
+            ), row=3, col=2)
 
         # SWC group (subplot 14)
         for j, swc in enumerate(['SWC_1_1_1', 'SWC_1_1_2', 'SWC_1_1_3']):
@@ -143,22 +143,27 @@ def update_graph(tab, n):
                 legendgrouptitle_text='SWC Sensors',
                 line=dict(width=1),
                 hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
-            ), row=4, col=2)
+            ), row=3, col=3)
+            
+            
+        fig.add_trace(go.Scatter(
+                        x=data['datetime'], y=data[var], mode='lines', name=var,
+                        showlegend=(j == 0),
+                        legendgroup='uvw',
+                        legendgrouptitle_text='U-V-W SIGMA',
+                        line=dict(width=1),
+                        hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
+            ), row=3, col=4)
+
 
         # Scatter USTAR vs WS (subplot 15)
         fig.add_trace(go.Scatter(
             x=data['USTAR'], y=data['WS'], mode='markers', name='USTAR vs WS',
             marker=dict(size=4, opacity=0.6),
             hovertemplate='USTAR: %{x:.2f}<br>WS: %{y:.2f}<extra></extra>'
-        ), row=4, col=3)
+        ), row=4, col=1)
 
-        # VPD (subplot 16)
-        fig.add_trace(go.Scatter(
-            x=data['datetime'], y=data['VPD'], mode='lines', name='VPD',
-            line=dict(width=1),
-            hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>VPD: %{y:.2f}<extra></extra>'
-        ), row=4, col=4)
-
+       
         for annotation in fig['layout']['annotations']:
             annotation['font'] = dict(size=12)
 
