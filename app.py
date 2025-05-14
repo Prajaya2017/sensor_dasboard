@@ -90,13 +90,13 @@ def update_graph(tab, n):
                         showlegend=(j == 0),
                         legendgroup='TA',
                         legendgrouptitle_text='TA Sensors',
-                        hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + sensor + ': %{y:.2f}<extra></extra>'
+                        hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + sensor + ': %{y:.2f}<extra></extra>'
                     ), row=row, col=col)
             else:
                 fig.add_trace(go.Scatter(
                     x=data['datetime'], y=data[var], mode='lines', name=var,
                     line=dict(width=1),
-                    hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
+                    hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
                 ), row=row, col=col)
 
         for annotation in fig['layout']['annotations']:
@@ -131,7 +131,7 @@ def update_graph(tab, n):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[var], mode='lines', name=var,
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=row, col=col)
             
         rad_cols = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
@@ -147,7 +147,7 @@ def update_graph(tab, n):
                 legendgroup='NetRad',
                 legendgrouptitle_text='Net Radiation',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=3, col=2)
 
 
@@ -165,7 +165,7 @@ def update_graph(tab, n):
                 legendgroup='SWC',
                 legendgrouptitle_text='SWC Sensors',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=3)
 
 
@@ -178,7 +178,7 @@ def update_graph(tab, n):
                 legendgroup='UVW',
                 legendgrouptitle_text='U_V_W_SIGMA',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=4)
 
 
