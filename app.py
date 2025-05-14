@@ -137,7 +137,7 @@ def update_graph(tab, n):
         rad_cols = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
         for col in rad_cols:
             data[col] = pd.to_numeric(data[col], errors='coerce')
-            data[col] = data[col].clip(lower=-2000, upper=2000)
+            data[col] = data[col].clip(lower=-100, upper=2000)
 
         # Net Radiation group
         for j, var in enumerate(rad_cols):
