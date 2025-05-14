@@ -90,13 +90,13 @@ def update_graph(tab, n):
                         showlegend=(j == 0),
                         legendgroup='TA',
                         legendgrouptitle_text='TA Sensors',
-                        hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + sensor + ': %{y:.2f}<extra></extra>'
+                        hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + sensor + ': %{y:.2f}<extra></extra>'
                     ), row=row, col=col)
             else:
                 fig.add_trace(go.Scatter(
                     x=data['datetime'], y=data[var], mode='lines', name=var,
                     line=dict(width=1),
-                    hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
+                    hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
                 ), row=row, col=col)
 
         for annotation in fig['layout']['annotations']:
@@ -131,13 +131,13 @@ def update_graph(tab, n):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[var], mode='lines', name=var,
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=row, col=col)
             
         rad_cols = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
         for col in rad_cols:
             data[col] = pd.to_numeric(data[col], errors='coerce')
-            data[col] = data[col].clip(lower=-100, upper=2000)
+            data[col] = data[col].clip(lower=-2000, upper=2000)
 
         # Net Radiation group
         for j, var in enumerate(rad_cols):
@@ -147,7 +147,7 @@ def update_graph(tab, n):
                 legendgroup='NetRad',
                 legendgrouptitle_text='Net Radiation',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=3, col=2)
 
 
@@ -165,7 +165,7 @@ def update_graph(tab, n):
                 legendgroup='SWC',
                 legendgrouptitle_text='SWC Sensors',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + swc + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=3)
 
 
@@ -178,16 +178,52 @@ def update_graph(tab, n):
                 legendgroup='UVW',
                 legendgrouptitle_text='U_V_W_SIGMA',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + swc + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=4)
 
 
-        # Scatter USTAR vs WS (subplot 15)
+        # Drop NA values for USTAR and WS
+        reg_data = data[['USTAR', 'WS']].dropna()
+
+        # Linear regression
+        x = reg_data['USTAR']
+        y = reg_data['WS']
+        slope, intercept = np.polyfit(x, y, 1)
+        r_value = np.corrcoef(x, y)[0, 1]
+        r_squared = r_value**2
+
+        # Regression line
+        x_line = np.linspace(x.min(), x.max(), 100)
+        y_line = slope * x_line + intercept
+
+        # Scatter points
         fig.add_trace(go.Scatter(
-            x=data['USTAR'], y=data['WS'], mode='markers', name='USTAR vs WS',
-            marker=dict(size=4, opacity=0.6),
+            x=x, y=y, mode='markers', name='USTAR vs WS',
+            marker=dict(size=4, opacity=0.6, color='rgba(0, 100, 200, 0.5)'),
             hovertemplate='USTAR: %{x:.2f}<br>WS: %{y:.2f}<extra></extra>'
         ), row=4, col=1)
+
+        # Regression line
+        fig.add_trace(go.Scatter(
+            x=x_line, y=y_line, mode='lines', name='Regression Line',
+            line=dict(color='firebrick', width=2, dash='dash'),
+            hoverinfo='skip'
+        ), row=4, col=1)
+
+        # Add regression equation and R² as annotation
+        fig.add_annotation(
+            xref='x domain', yref='y domain',
+            x=0.05, y=0.95,
+            text=f'y = {slope:.2f}x + {intercept:.2f}<br>R² = {r_squared:.2f}',
+            showarrow=False,
+            font=dict(size=11, color='black'),
+            align='left',
+            bgcolor='rgba(255,255,255,0.8)',
+            bordercolor='gray',
+            borderwidth=1,
+            row=4, col=1
+        )
+
 
        
         for annotation in fig['layout']['annotations']:
