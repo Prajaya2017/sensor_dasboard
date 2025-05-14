@@ -10,7 +10,9 @@ import numpy as np
 data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
+data['G'] = pd.to_numeric(data['G'], errors='coerce')  # convert strings to numbers, set non-convertible to NaN
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -900), np.nan)
+
 
 # Variables for each tab
 tab1_variables = [
