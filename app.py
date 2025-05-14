@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 
 # Load and preprocess data
-data = pd.read_csv('C:/Campbellsci/LoggerNet/Irgason_garden_Flux_AmeriFluxFormat.dat',
+data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
 # force numeric conversion (invalid parsing becomes NaN)
@@ -59,7 +59,7 @@ app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
-    html.H2("Real Time Data Monitor", style={'textAlign': 'center'}),
+    html.H2("Real Time Data Monitor - Instrument Garden", style={'textAlign': 'center'}),
     dcc.Tabs(id='tabs', value='tab1', children=[
         dcc.Tab(label='FLUX MET VAR I', value='tab1', style=tab_style, selected_style=selected_tab_style),
         dcc.Tab(label='FLUX MET VAR II', value='tab2', style=tab_style, selected_style=selected_tab_style),
