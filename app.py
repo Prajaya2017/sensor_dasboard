@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 
 # Load and preprocess data
-data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
+data = pd.read_csv('C:/Campbellsci/LoggerNet/Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
 # force numeric conversion (invalid parsing becomes NaN)
@@ -81,10 +81,14 @@ def update_graph(tab, n):
         ], horizontal_spacing=0.03, vertical_spacing=0.06)
 
         for i, var in enumerate(tab1_variables):
-            row, col = i // 4 + 1, i % 4 + 1
+            row, col_idx = i // 4 + 1, i % 4 + 1
             if var == 'TA_COMBINED':
-       
-                for j, sensor in enumerate(['TA_1_1_1', 'TA_1_1_2', 'TA_1_1_3']):
+                TA_cols = ['TA_1_1_1', 'TA_1_1_2', 'TA_1_1_3']
+                for col in TA_cols:
+                    data[col] = pd.to_numeric(data[col], errors='coerce')
+                    data[col] = data[col].clip(lower=-20, upper=45)
+
+                for j, sensor in enumerate(TA_cols):
                     fig.add_trace(go.Scatter(
                         x=data['datetime'], y=data[sensor], mode='lines', name=sensor,
                         line=dict(width=1),
@@ -92,13 +96,13 @@ def update_graph(tab, n):
                         legendgroup='TA',
                         legendgrouptitle_text='TA Sensors',
                         hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + sensor + ': %{y:.2f}<extra></extra>'
-                    ), row=row, col=col)
+                    ), row=row, col=col_idx)
             else:
                 fig.add_trace(go.Scatter(
                     x=data['datetime'], y=data[var], mode='lines', name=var,
                     line=dict(width=1),
                     hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
-                ), row=row, col=col)
+                ), row=row, col=col_idx)
 
         for annotation in fig['layout']['annotations']:
             annotation['font'] = dict(size=12)
