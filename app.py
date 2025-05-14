@@ -83,9 +83,7 @@ def update_graph(tab, n):
         for i, var in enumerate(tab1_variables):
             row, col = i // 4 + 1, i % 4 + 1
             if var == 'TA_COMBINED':
-                data['TA_1_1_1'] = data['TA_1_1_1'].clip(lower=-20, upper=40)
-                data['TA_1_1_2'] = data['TA_1_1_2'].clip(lower=-20, upper=40)
-                data['TA_1_1_3'] = data['TA_1_1_3'].clip(lower=-20, upper=40)
+       
                 for j, sensor in enumerate(['TA_1_1_1', 'TA_1_1_2', 'TA_1_1_3']):
                     fig.add_trace(go.Scatter(
                         x=data['datetime'], y=data[sensor], mode='lines', name=sensor,
