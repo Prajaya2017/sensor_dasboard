@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May 13 19:54:19 2025
+
+@author: pprajapati
+"""
+
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
@@ -7,12 +14,10 @@ import pandas as pd
 import numpy as np
 
 # Load and preprocess data
-data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
+data = pd.read_csv('C:/Campbellsci/LoggerNet/Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
-data['G'] = pd.to_numeric(data['G'], errors='coerce')  # convert strings to numbers, set non-convertible to NaN
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -900), np.nan)
-
 
 # Variables for each tab
 tab1_variables = [
@@ -148,13 +153,14 @@ def update_graph(tab, n):
             ), row=3, col=3)
             
             
-        fig.add_trace(go.Scatter(
-                        x=data['datetime'], y=data[var], mode='lines', name=var,
-                        showlegend=(j == 0),
-                        legendgroup='uvw',
-                        legendgrouptitle_text='U-V-W SIGMA',
-                        line=dict(width=1),
-                        hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
+        for j, swc in enumerate(['U_SIGMA','V_SIGMA', 'W_SIGMA']):
+            fig.add_trace(go.Scatter(
+                x=data['datetime'], y=data[swc], mode='lines', name=swc,
+                showlegend=(j == 0),
+                legendgroup='UVW',
+                legendgrouptitle_text='U_V_W_SIGMA',
+                line=dict(width=1),
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=4)
 
 
