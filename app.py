@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 
 # Load and preprocess data
-data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
+data = pd.read_csv('C:/Campbellsci/LoggerNet/Irgason_garden_Flux_AmeriFluxFormat.dat',
                    skiprows=[0, 2, 3], header=0)
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
 # force numeric conversion (invalid parsing becomes NaN)
@@ -133,10 +133,14 @@ def update_graph(tab, n):
                 line=dict(width=1),
                 hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=row, col=col)
+            
+        rad_cols = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
+        for col in rad_cols:
+            data[col] = pd.to_numeric(data[col], errors='coerce')
+            data[col] = data[col].clip(lower=-2000, upper=2000)
 
-        # Net Radiation group (subplot 9 at row 3, col 1)
-        netrad_vars = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
-        for j, var in enumerate(netrad_vars):
+        # Net Radiation group
+        for j, var in enumerate(rad_cols):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[var], mode='lines', name=var,
                 showlegend=(j == 0),
@@ -146,8 +150,15 @@ def update_graph(tab, n):
                 hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=3, col=2)
 
+
+
+        swc_cols = ['SWC_1_1_1', 'SWC_1_1_2', 'SWC_1_1_3']
+        for col in swc_cols:
+            data[col] = pd.to_numeric(data[col], errors='coerce')  # convert invalid entries to NaN
+            data[col] = data[col].clip(lower=-900, upper=900)  # soil water content typically between 0 and 1
+
         # SWC group (subplot 14)
-        for j, swc in enumerate(['SWC_1_1_1', 'SWC_1_1_2', 'SWC_1_1_3']):
+        for j, swc in enumerate(swc_cols):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[swc], mode='lines', name=swc,
                 showlegend=(j == 0),
@@ -156,6 +167,8 @@ def update_graph(tab, n):
                 line=dict(width=1),
                 hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=3)
+
+
             
             
         for j, swc in enumerate(['U_SIGMA','V_SIGMA', 'W_SIGMA']):
