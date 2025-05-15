@@ -13,30 +13,34 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 
-# Load and preprocess data
-data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',
-                   skiprows=[0, 2, 3], header=0)
+# Load and preprocess 
+data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',skiprows=[0, 2, 3], header=0)
+
+exclude_cols = ['TIMESTAMP', 'TIMESTAMP_START', 'TIMESTAMP_END']
+cols_to_convert = [col for col in data.columns if col not in exclude_cols]
+data[cols_to_convert] = data[cols_to_convert].apply(pd.to_numeric, errors='coerce')
+
+# Correct datetime issue
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
-# force numeric conversion (invalid parsing becomes NaN)
-data['G'] = pd.to_numeric(data['G'], errors='coerce')
 
-# now apply the range filter
+# Apply range filter
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -500), np.nan)
-
 
 # Variables for each tab
 tab1_variables = [
     'FC', 'LE', 'H', 'ET',
     'TAU', 'USTAR',
-    'RH_1_1_1', 'PA', 'WS', 'WD', 'VPD',
+    'RH_1_1_3', 'PA', 'WS', 'WD', 'VPD',
     'TA_COMBINED', 'PBLH'
 ]
 
 tab2_variables = [
-     'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-    'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC','NET RAD'
+    'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
+    'G', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC', 'NET RAD',
     'SWC', 'U-V-W SIGMA', 'USTAR vs WS'
 ]
+
+
 
 # Styles
 tab_style = {
@@ -75,10 +79,19 @@ app.layout = html.Div([
 )
 def update_graph(tab, n):
     if tab == 'tab1':
-        fig = make_subplots(rows=4, cols=4, subplot_titles=[
-            var if var != 'TA_COMBINED' else 'TA'
-            for var in tab1_variables
-        ], horizontal_spacing=0.03, vertical_spacing=0.06)
+        fig = make_subplots(rows=4, cols=4, subplot_titles=['CO₂ Flux (µmol m⁻² s⁻¹)',
+                            'Latent Heat Flux (W m⁻²)',
+                            'Sensible Heat Flux (W m⁻²)',
+                            'Evapotranspiration (mm)',
+                            'Momentum Flux (kg m⁻¹ s⁻²)',
+                            'Friction Velocity (m s⁻¹)',
+                            'Relative Humidity (%)',
+                            'Atmospheric Pressure (kPa)',
+                            'Wind Speed (m s⁻¹)',
+                            'Wind Direction (°)',
+                            'Vapor Pressure Deficit (kPa)',
+                            'Air Temperature (°C)',
+                            'PBL Height (m)'], horizontal_spacing=0.03, vertical_spacing=0.06)
 
         for i, var in enumerate(tab1_variables):
             row, col_idx = i // 4 + 1, i % 4 + 1
@@ -121,14 +134,23 @@ def update_graph(tab, n):
 
     elif tab == 'tab2':
         fig = make_subplots(rows=4, cols=4, subplot_titles=[
-            'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-            'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC',
-            'NET RAD','SWC', 'U-V-W SIGMA', 'USTAR vs WS'
-        ], horizontal_spacing=0.03, vertical_spacing=0.06)
+                         'CO₂ Concentration (ppm)',
+                'H₂O Concentration (mmol mol⁻¹)',
+                 'Max Fetch (m)',
+                 '90% Fetch (m)',
+                'Soil Heat Flux (W m⁻²)',
+                 'Stability Parameter (Z/L)',
+                'Monin-Obukhov Length (m)',
+                'Pressure (kPa)',
+                 'Sonic Temp (°C)',
+                'Net Radiation (W m⁻²)',
+               'Soil Water Content (m³ m⁻³)',
+                'σ (m s⁻¹)',
+                'USTAR vs WS'],horizontal_spacing=0.03, vertical_spacing=0.06)
 
         vars_to_plot = [
              'CO2', 'H2O', 'FETCH_MAX', 'FETCH_90',
-            'FETCH_40', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC'
+            'G', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC'
         ]
 
         for i, var in enumerate(vars_to_plot):
@@ -141,10 +163,8 @@ def update_graph(tab, n):
             
         rad_cols = ['NETRAD', 'SW_IN', 'SW_OUT', 'LW_IN', 'LW_OUT']
         for col in rad_cols:
-            data[col] = pd.to_numeric(data[col], errors='coerce')
-            data[col] = data[col].clip(lower=-200, upper=2000)
+              data[col] = data[col].clip(lower=-200, upper=2000)
 
-        # Net Radiation group
         for j, var in enumerate(rad_cols):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[var], mode='lines', name=var,
@@ -152,17 +172,13 @@ def update_graph(tab, n):
                 legendgroup='NetRad',
                 legendgrouptitle_text='Net Radiation',
                 line=dict(width=1),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + var + ': %{y:.2f}<extra></extra>'
+                hovertemplate='%{x|%Y-%m-%d %H:%M:%S}<br>' + var + ': %{y:.2f}<extra></extra>'
             ), row=3, col=2)
-
-
 
         swc_cols = ['SWC_1_1_1', 'SWC_1_1_2', 'SWC_1_1_3']
         for col in swc_cols:
-            data[col] = pd.to_numeric(data[col], errors='coerce')  # convert invalid entries to NaN
-            data[col] = data[col].clip(lower=-900, upper=900)  # soil water content typically between 0 and 1
+            data[col] = data[col].clip(lower=-900, upper=900)
 
-        # SWC group (subplot 14)
         for j, swc in enumerate(swc_cols):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[swc], mode='lines', name=swc,
@@ -173,9 +189,6 @@ def update_graph(tab, n):
                 hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=3)
 
-
-            
-            
         for j, swc in enumerate(['U_SIGMA','V_SIGMA', 'W_SIGMA']):
             fig.add_trace(go.Scatter(
                 x=data['datetime'], y=data[swc], mode='lines', name=swc,
@@ -186,36 +199,28 @@ def update_graph(tab, n):
                 hovertemplate='%{x|%Y-%m-%d %H:%M}<br>' + swc + ': %{y:.2f}<extra></extra>'
             ), row=3, col=4)
 
-
-        # Drop NA values for USTAR and WS
         reg_data = data[['USTAR', 'WS']].dropna()
-
-        # Linear regression
         x = reg_data['USTAR']
         y = reg_data['WS']
         slope, intercept = np.polyfit(x, y, 1)
         r_value = np.corrcoef(x, y)[0, 1]
         r_squared = r_value**2
 
-        # Regression line
         x_line = np.linspace(x.min(), x.max(), 100)
         y_line = slope * x_line + intercept
 
-        # Scatter points
         fig.add_trace(go.Scatter(
             x=x, y=y, mode='markers', name='USTAR vs WS',
             marker=dict(size=4, opacity=0.6, color='rgba(0, 100, 200, 0.5)'),
             hovertemplate='USTAR: %{x:.2f}<br>WS: %{y:.2f}<extra></extra>'
         ), row=4, col=1)
 
-        # Regression line
         fig.add_trace(go.Scatter(
             x=x_line, y=y_line, mode='lines', name='Regression Line',
             line=dict(color='firebrick', width=2, dash='dash'),
             hoverinfo='skip'
         ), row=4, col=1)
 
-        # Add regression equation and R² as annotation
         fig.add_annotation(
             xref='x domain', yref='y domain',
             x=0.05, y=0.95,
@@ -229,8 +234,6 @@ def update_graph(tab, n):
             row=4, col=1
         )
 
-
-       
         for annotation in fig['layout']['annotations']:
             annotation['font'] = dict(size=12)
 
