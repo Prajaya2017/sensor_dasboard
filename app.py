@@ -13,7 +13,7 @@ from plotly.subplots import make_subplots
 import pandas as pd
 import numpy as np
 
-# Load and preprocess 
+# Load and preprocess data 
 data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',skiprows=[0, 2, 3], header=0)
 
 exclude_cols = ['TIMESTAMP', 'TIMESTAMP_START', 'TIMESTAMP_END']
