@@ -20,9 +20,11 @@ exclude_cols = ['TIMESTAMP', 'TIMESTAMP_START', 'TIMESTAMP_END']
 cols_to_convert = [col for col in data.columns if col not in exclude_cols]
 data[cols_to_convert] = data[cols_to_convert].apply(pd.to_numeric, errors='coerce')
 
+
+
 # Correct datetime issue
 data['datetime'] = pd.to_datetime(data['TIMESTAMP'])
-
+data = data.drop_duplicates(subset='datetime', keep='first')
 # Apply range filter
 data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -500), np.nan)
 
