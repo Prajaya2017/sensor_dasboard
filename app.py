@@ -143,7 +143,7 @@ def update_graph(tab, n):
                 'Soil Heat Flux (W m⁻²)',
                  'Stability Parameter (Z/L)',
                 'Monin-Obukhov Length (m)',
-                'Pressure (kPa)',
+                'Precipitation (mm)',
                  'Sonic Temp (°C)',
                 'Net Radiation (W m⁻²)',
                'Soil Water Content (m³ m⁻³)',
