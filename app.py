@@ -16,7 +16,7 @@ import numpy as np
 # Load and preprocess data 
 #data = pd.read_csv('Irgason_garden_Flux_AmeriFluxFormat.dat',skiprows=[0, 2, 3], header=0)
 
-url = "https://raw.githubusercontent.com/Prajaya2017/sensor_dasboard/main/Irgason_garden_Flux_AmeriFluxFormat.dat"
+url = "https://raw.githubusercontent.com/Prajaya2017/sensor_dasboard/main/Irgason_garden_AmrFlux.dat"
 data = pd.read_csv(url,skiprows=[0, 2, 3], header=0)
 
 
