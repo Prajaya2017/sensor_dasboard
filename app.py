@@ -20,7 +20,7 @@ data = data.drop_duplicates(subset='datetime', keep='first')
 
 # Reindex to ensure time continuity (1-hour frequency)
 data = data.set_index('datetime')
-full_index = pd.date_range(start=data.index.min(), end=data.index.max(), freq='H')
+full_index = pd.date_range(start=data.index.min(), end=data.index.max(), freq='h')
 data = data.reindex(full_index)
 data.index.name = 'datetime'
 data.reset_index(inplace=True)
