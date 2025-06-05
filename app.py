@@ -87,11 +87,11 @@ def update_graph(tab, n):
     elif tab == 'tab2':
         fig = make_subplots(rows=4, cols=4, subplot_titles=[
             'CO₂ Concentration (ppm)', 'H₂O Concentration (mmol mol⁻¹)', 'Max Fetch (m)', '90% Fetch (m)',
-            'Soil Heat Flux (W m⁻²)', 'Stability Parameter (Z/L)', 'Monin-Obukhov Length (m)', 'Precipitation (mm)',
+            'Soil Heat Flux (W m⁻²)', 'Stability Parameter (z/L)', 'Monin-Obukhov Length (m)', 'Precipitation (mm)',
             'Sonic Temp (°C)', 'Net Radiation (W m⁻²)', 'Soil Water Content (m³ m⁻³)', 'σ (m s⁻¹)', 'USTAR vs WS'
         ], horizontal_spacing=0.03, vertical_spacing=0.06)
 
-        vars_to_plot = ['CO2', 'H2O', 'FETCH_MAX', 'FETCH_90', 'G', 'ZL', 'MO_LENGTH', 'P', 'T_SONIC']
+        vars_to_plot = ['CO2', 'H2O', 'FETCH_MAX', 'FETCH_90', 'G', 'zL', 'MO_LENGTH', 'P', 'T_SONIC']
         for i, var in enumerate(vars_to_plot):
             row, col = i // 4 + 1, i % 4 + 1
             fig.add_trace(go.Scatter(
