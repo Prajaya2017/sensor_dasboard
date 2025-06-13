@@ -26,10 +26,10 @@ data.index.name = 'datetime'
 data.reset_index(inplace=True)
 
 # Filter invalid ranges
-data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -500), np.nan)
+#data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -500), np.nan)
 
 tab1_variables = ['FC', 'LE', 'H', 'TAU', 'USTAR', 'RH_1_1_3', 'PA', 'WS', 'WD', 'VPD', 'TA_COMBINED']
-tab2_variables = ['CO2', 'H2O', 'FETCH_MAX', 'FETCH_90', 'G', 'zL', 'MO_LENGTH', 'P', 'T_SONIC', 'NET RAD', 'SWC', 'U-V-W SIGMA', 'USTAR vs WS']
+tab2_variables = ['CO2', 'H2O', 'FETCH_MAX', 'FETCH_90', 'zL', 'MO_LENGTH', 'P', 'T_SONIC', 'NET RAD', 'SWC', 'U-V-W SIGMA', 'USTAR vs WS']
 
 tab_style = {'padding': '8px', 'fontWeight': 'bold', 'backgroundColor': '#eaf2fb', 'border': '1px solid #1f77b4', 'borderRadius': '3px', 'margin': '5px', 'color': '#1f77b4'}
 selected_tab_style = {**tab_style, 'backgroundColor': '#1f77b4', 'color': 'white'}
@@ -91,7 +91,7 @@ def update_graph(tab, n):
             'Sonic Temp (°C)', 'Net Radiation (W m⁻²)', 'Soil Water Content (m³ m⁻³)', 'σ (m s⁻¹)', 'USTAR vs WS'
         ], horizontal_spacing=0.03, vertical_spacing=0.06)
 
-        vars_to_plot = ['CO2', 'H2O', 'FETCH_MAX', 'FETCH_90', 'G', 'zL', 'MO_LENGTH', 'P', 'T_SONIC']
+        vars_to_plot = ['CO2', 'H2O', 'FETCH_MAX', 'FETCH_90', 'zL', 'MO_LENGTH', 'P', 'T_SONIC']
         for i, var in enumerate(vars_to_plot):
             row, col = i // 4 + 1, i % 4 + 1
             fig.add_trace(go.Scatter(
