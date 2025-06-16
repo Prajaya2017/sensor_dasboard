@@ -69,9 +69,9 @@ server = app.server
 app.layout = html.Div([
     html.H2("Real Time Data Monitor", style={'textAlign': 'center'}),
     dcc.Tabs(id='tabs', value='tab1', children=[
-        dcc.Tab(label='FLUX MET VAR I', value='tab1', style=tab_style, selected_style=selected_tab_style),
-        dcc.Tab(label='FLUX MET VAR II', value='tab2', style=tab_style, selected_style=selected_tab_style),
-        dcc.Tab(label='SIF', value='tab3', style=tab_style, selected_style=selected_tab_style),
+        dcc.Tab(label='FLUX MET VAR I (Logan, UT)', value='tab1', style=tab_style, selected_style=selected_tab_style),
+        dcc.Tab(label='FLUX MET VAR II (Logan, UT)', value='tab2', style=tab_style, selected_style=selected_tab_style),
+        dcc.Tab(label='SIF (Hainan, China)', value='tab3', style=tab_style, selected_style=selected_tab_style),
     ]),
     html.Div(id='tab-content'),
     dcc.Interval(id='update', interval=60000, n_intervals=0)
