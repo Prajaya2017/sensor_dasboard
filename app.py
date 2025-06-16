@@ -24,7 +24,7 @@ data['G'] = data['G'].where((data['G'] <= 900) & (data['G'] >= -500), np.nan)
 
 # Load and preprocess SIF dataset for tab3
 sif_data = pd.read_csv(
-    "C:/Users/pprajapati/sensor_dasboard/SIF_half_hourly_output_20250606_20250609.txt",
+    "https://raw.githubusercontent.com/Prajaya2017/sensor_dasboard/main/SIF_half_hourly_output_20250606_20250609.txt",
     skiprows=[1],
     header=0,
     parse_dates=["TIMESTAMP"]
